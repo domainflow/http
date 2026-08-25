@@ -1,0 +1,108 @@
+{
+  "name": "domainflow/http",
+  "description": "A lightweight PSR-7/15 HTTP kernel, routing, endpoint dispatch, and problem-details package for DomainFlow applications.",
+  "keywords": [
+    "http", "psr-7", "psr-15", "routing", "microservice", "ddd", "domainflow"
+  ],
+  "type": "library",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "DomainFlow",
+      "homepage": "https://www.domainflow.dev"
+    }
+  ],
+  "support": {
+    "issues": "https://github.com/domainflow/http/issues",
+    "source": "https://github.com/domainflow/http"
+  },
+  "require": {
+    "php": "^8.4",
+    "phpstan/phpdoc-parser": "^2.0",
+    "psr/container": "^2.0",
+    "psr/http-factory": "^1.1",
+    "psr/http-message": "^2.0",
+    "psr/http-server-handler": "^1.0",
+    "psr/http-server-middleware": "^1.0",
+    "relay/relay": "^3.0",
+    "symfony/routing": "^7.4.12 || ^8.0.12",
+    "symfony/type-info": "^7.4.9 || ^8.0.9"
+  },
+  "require-dev": {
+    "domainflow/core": "^0.2.0",
+    "friendsofphp/php-cs-fixer": "^3.95",
+    "nikic/php-parser": "^5.7",
+    "nyholm/psr7": "^1.8",
+    "phpstan/phpstan": "^2.2",
+    "phpstan/phpstan-deprecation-rules": "^2.0",
+    "phpunit/phpunit": "^13.0",
+    "symfony/phpunit-bridge": "^8.0"
+  },
+  "suggest": {
+    "domainflow/core": "Registers the optional DomainFlow service-provider bridge.",
+    "laminas/laminas-httphandlerrunner": "Emits PSR-7 responses in a traditional PHP SAPI runtime.",
+    "nyholm/psr7": "Provides PSR-7 and PSR-17 implementations for applications.",
+    "nyholm/psr7-server": "Creates a PSR-7 server request from PHP globals.",
+    "symfony/serializer": "Can back a custom request hydrator for complex polymorphic DTOs."
+  },
+  "autoload": {
+    "psr-4": {
+      "DomainFlow\\": "src/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "DomainFlow\\Http\\Tests\\Integration\\": "tests/Integration/",
+      "DomainFlow\\Http\\Tests\\Unit\\": "tests/Unit/"
+    },
+    "files": [
+      "tests/Fixture/HttpFixtures.php"
+    ]
+  },
+  "scripts": {
+    "test": [
+      "./vendor/bin/phpunit --testsuite=Unit -c phpunit.xml --no-coverage"
+    ],
+    "test-integration": [
+      "./vendor/bin/phpunit --testsuite=Integration -c phpunit.xml --no-coverage"
+    ],
+    "test-all": [
+      "./vendor/bin/phpunit -c phpunit.xml --no-coverage"
+    ],
+    "test:coverage": [
+      "@putenv XDEBUG_MODE=coverage",
+      "./vendor/bin/phpunit -c phpunit.xml --coverage-html=build/testcoverage",
+      "@php tools/assert-full-line-coverage.php build/testcoverage/clover.xml"
+    ],
+    "code-coverage": "@test:coverage",
+    "phpstan": "./vendor/bin/phpstan analyse -c phpstan.neon --memory-limit=1G",
+    "lint": "./vendor/bin/php-cs-fixer check src tests --config=./php_cs.dist.php --diff",
+    "format": "./vendor/bin/php-cs-fixer fix src tests --config=./php_cs.dist.php",
+    "fix": "@format",
+    "quality": [
+      "@composer validate --strict --no-check-publish --no-check-lock",
+      "@lint",
+      "@phpstan",
+      "@test:coverage",
+      "@composer audit"
+    ]
+  },
+  "scripts-descriptions": {
+    "test": "Run the PHPUnit unit suite",
+    "test-integration": "Run the PHPUnit integration suite",
+    "test-all": "Run the complete PHPUnit suite",
+    "test:coverage": "Run the complete suite and require full line coverage",
+    "code-coverage": "Alias for test:coverage",
+    "phpstan": "Run static analysis",
+    "lint": "Check PHP formatting without modifying files",
+    "format": "Apply PHP formatting fixes",
+    "quality": "Run every mandatory package quality gate"
+  },
+  "config": {
+    "preferred-install": "dist",
+    "sort-packages": true,
+    "optimize-autoloader": true
+  },
+  "minimum-stability": "dev",
+  "prefer-stable": true
+}
