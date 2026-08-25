@@ -1,0 +1,19 @@
+{
+  "name": "domainflow/http-runtime-example",
+  "description": "A minimal DomainFlow HTTP runtime entry point.",
+  "license": "MIT",
+  "require": {
+    "php": "^8.4",
+    "domainflow/http": "^0.1",
+    "laminas/laminas-httphandlerrunner": "^2.11",
+    "nyholm/psr7": "^1.8",
+    "nyholm/psr7-server": "^1.1"
+  },
+  "autoload": {
+    "psr-4": {
+      "DomainFlow\\Http\\Example\\": "src/"
+    }
+  },
+  "minimum-stability": "dev",
+  "prefer-stable": true
+}
