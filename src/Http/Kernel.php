@@ -38,15 +38,18 @@ final readonly class Kernel implements RequestHandlerInterface
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
         try {
-            $dispatch = fn (ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface => $this->dispatch($request);
+            $dispatch = function (ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface {
+                try {
+                    return $this->dispatch($request);
+                } catch (Throwable $exception) {
+                    return $this->problemResponse($exception);
+                }
+            };
             $pipeline = new Relay([...$this->middleware, $dispatch]);
 
             return $pipeline->handle($request);
         } catch (Throwable $exception) {
-            $problem = $this->problemDetailsMapper->map($exception)
-                ?? new ProblemDetails(500, 'Internal Server Error');
-
-            return $this->responseFactory->fromProblem($problem);
+            return $this->problemResponse($exception);
         }
     }
 
@@ -72,5 +75,13 @@ final readonly class Kernel implements RequestHandlerInterface
         }
 
         return $this->responseFactory->fromResult($result);
+    }
+
+    private function problemResponse(Throwable $exception): ResponseInterface
+    {
+        $problem = $this->problemDetailsMapper->map($exception)
+            ?? new ProblemDetails(500, 'Internal Server Error');
+
+        return $this->responseFactory->fromProblem($problem);
     }
 }
