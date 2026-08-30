@@ -20,6 +20,10 @@ use Nyholm\Psr7\Factory\Psr17Factory;
 use Nyholm\Psr7\ServerRequest;
 use PHPUnit\Framework\Attributes\CoversNothing;
 use PHPUnit\Framework\TestCase;
+use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\ServerRequestInterface;
+use Psr\Http\Server\MiddlewareInterface;
+use Psr\Http\Server\RequestHandlerInterface;
 use Symfony\Component\Routing\Generator\UrlGenerator;
 use Symfony\Component\Routing\Matcher\UrlMatcher;
 use Symfony\Component\Routing\RequestContext;
@@ -71,7 +75,18 @@ final class KernelIntegrationTest extends TestCase
         $this->assertSame(400, $invalid->getStatusCode());
     }
 
-    private function kernel(): Kernel
+    public function testMiddlewareCanDecorateProblemDetailsResponses(): void
+    {
+        $kernel = $this->kernel([new RequestIdMiddleware()]);
+
+        $response = $kernel->handle(new ServerRequest('GET', '/missing'));
+
+        $this->assertSame(404, $response->getStatusCode());
+        $this->assertSame('request-123', $response->getHeaderLine('X-Request-Id'));
+    }
+
+    /** @param list<MiddlewareInterface> $middleware */
+    private function kernel(array $middleware = []): Kernel
     {
         $routes = (new RouteCollector())->collect([CreateOrderEndpoint::class]);
         $context = new RequestContext();
@@ -91,6 +106,15 @@ final class KernelIntegrationTest extends TestCase
             new InvokableEndpointInvoker(),
             new CompositeProblemDetailsMapper([new DefaultProblemDetailsMapper()]),
             new JsonResponseFactory($psr17, $psr17),
+            $middleware,
         );
+    }
+}
+
+final class RequestIdMiddleware implements MiddlewareInterface
+{
+    public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
+    {
+        return $handler->handle($request)->withHeader('X-Request-Id', 'request-123');
     }
 }
