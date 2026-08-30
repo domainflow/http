@@ -184,7 +184,7 @@ final class ReflectionRequestHydrator implements RequestHydrator
         $values = $this->sourceValues($this->bodyData($body), false);
         $values = array_replace($values, $this->sourceValues($request->getQueryParams(), true));
 
-        return array_replace($values, $this->sourceValues($match->pathParameters, true));
+        return array_replace($values, $this->sourceValues($match->routeParameters, true));
     }
 
     /**

@@ -58,7 +58,7 @@ final class ReflectionRequestHydratorTest extends TestCase
         $this->assertNull($dto->note);
     }
 
-    public function testPathParametersOverrideBodyAndQueryValues(): void
+    public function testRouteParametersOverrideBodyAndQueryValues(): void
     {
         $request = $this->jsonRequest([
             'customerId' => 'from-body',
