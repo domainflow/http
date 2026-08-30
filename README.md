@@ -56,7 +56,38 @@ final readonly class HelloRequest
 }
 ```
 
+## Routing and request input
 
+`Router::match()` returns a `RouteMatch` whose `routeParameters` contain every
+application placeholder captured by the route. This includes placeholders from
+both the URI path and the host; internal routing metadata is not exposed:
+
+```php
+#[Route(
+    method: 'GET',
+    path: '/reports/{reportId}',
+    host: '{tenant}.api.example.test',
+)]
+final class TenantReportEndpoint
+{
+    public function __invoke(): void
+    {
+    }
+}
+
+// https://acme.api.example.test/reports/42
+// routeParameters: ['reportId' => '42', 'tenant' => 'acme']
+```
+
+Request hydration combines JSON body fields, query parameters, and route
+parameters. Query parameters override body fields, and route parameters have
+the highest precedence so a client cannot replace a value captured by the
+matched path or host.
+
+`Router::generate()` always returns an origin-less URI reference such as
+`/reports/42`. The scheme and host are omitted even when the route constrains
+them; applications that need an absolute URI remain responsible for supplying
+the origin.
 
 ## Runtime implementations
 

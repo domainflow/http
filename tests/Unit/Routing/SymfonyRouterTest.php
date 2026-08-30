@@ -59,7 +59,7 @@ final class SymfonyRouterTest extends TestCase
         );
     }
 
-    public function testMatchesARequestAndKeepsOnlyApplicationPathParameters(): void
+    public function testMatchesARequestAndKeepsOnlyApplicationRouteParameters(): void
     {
         $id = '018f4f7c-41f0-7c1a-9e66-31d1786b9471';
         $request = new ServerRequest('GET', 'https://api.example.test:8443/orders/' . $id . '?expand=items');
@@ -69,7 +69,31 @@ final class SymfonyRouterTest extends TestCase
         $this->assertSame('orders.show', $match->routeName);
         $this->assertSame(CreateOrderEndpoint::class, $match->endpointClass);
         $this->assertSame(CreateOrderRequest::class, $match->requestClass);
-        $this->assertSame(['orderId' => $id], $match->pathParameters);
+        $this->assertSame(['orderId' => $id], $match->routeParameters);
+    }
+
+    public function testExposesHostAndPathPlaceholdersAsRouteParameters(): void
+    {
+        $match = $this->tenantRouter()->match(new ServerRequest(
+            'GET',
+            'https://acme.api.example.test/reports/42',
+        ));
+
+        $this->assertSame(
+            ['reportId' => '42', 'tenant' => 'acme'],
+            $match->routeParameters,
+        );
+    }
+
+    public function testGeneratesAnOriginlessReferenceForAHostAndSchemeConstrainedRoute(): void
+    {
+        $this->assertSame(
+            '/reports/42',
+            $this->tenantRouter()->generate('reports.show', [
+                'tenant' => 'acme',
+                'reportId' => '42',
+            ]),
+        );
     }
 
     public function testUpdatesTheCompleteSharedContextFromEveryRequest(): void
@@ -140,7 +164,7 @@ final class SymfonyRouterTest extends TestCase
             '_endpoint' => CreateOrderEndpoint::class,
             '_request' => 'Missing\\Request',
         ]];
-        yield 'non-string path parameter' => [[
+        yield 'non-string route parameter' => [[
             '_route' => 'orders.show',
             '_endpoint' => CreateOrderEndpoint::class,
             '_request' => CreateOrderRequest::class,
@@ -184,5 +208,24 @@ final class SymfonyRouterTest extends TestCase
             $this->assertSame('missing.route', $exception->routeName());
             $this->assertSame($cause, $exception->getPrevious());
         }
+    }
+
+    private function tenantRouter(): SymfonyRouter
+    {
+        $routes = new RouteCollection();
+        $routes->add('reports.show', new Route(
+            '/reports/{reportId}',
+            ['_endpoint' => CreateOrderEndpoint::class],
+            host: '{tenant}.api.example.test',
+            schemes: ['https'],
+            methods: ['GET'],
+        ));
+        $context = new RequestContext();
+
+        return new SymfonyRouter(
+            new UrlMatcher($routes, $context),
+            new UrlGenerator($routes, $context),
+            $context,
+        );
     }
 }
