@@ -10,6 +10,10 @@ interface Router
 {
     public function match(ServerRequestInterface $request): RouteMatch;
 
-    /** @param array<string, mixed> $parameters */
+    /**
+     * Generates an origin-less URI reference for a named route.
+     *
+     * @param array<string, mixed> $parameters
+     */
     public function generate(string $routeName, array $parameters = []): string;
 }

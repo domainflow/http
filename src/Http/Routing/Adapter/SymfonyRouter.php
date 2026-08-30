@@ -75,7 +75,7 @@ final readonly class SymfonyRouter implements Router
             throw InvalidRouteMatchException::fromMatcherData();
         }
 
-        $pathParameters = [];
+        $routeParameters = [];
         foreach ($parameters as $name => $value) {
             if (is_string($name) && str_starts_with($name, '_')) {
                 continue;
@@ -85,10 +85,10 @@ final readonly class SymfonyRouter implements Router
                 throw InvalidRouteMatchException::fromMatcherData();
             }
 
-            $pathParameters[$name] = $value;
+            $routeParameters[$name] = $value;
         }
 
-        return new RouteMatch($routeName, $endpointClass, $requestClass, $pathParameters);
+        return new RouteMatch($routeName, $endpointClass, $requestClass, $routeParameters);
     }
 
     private function updateContext(ServerRequestInterface $request): void
